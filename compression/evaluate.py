@@ -32,7 +32,7 @@ def validation(model, data_loader):
             raise RuntimeError('Cannot use TensorRT without CUDA')
 
         # Optimize
-        model = torch2trt(model, [x])
+        model = torch2trt(model, [x], max_batch_size=config.batch_size)
     
     total_imgs = 0
     times, accs = [], []
@@ -55,7 +55,7 @@ def validation(model, data_loader):
 
         accs.append(acc.item())
 
-    print('Finished evaluating over % images \n'
+    print('Finished evaluating over %d images \n'
           'Avg Time per Image: %.4f(micro-sec). Accuracy: %.4f' % (total_imgs, float(np.mean(times)), float(np.mean(accs)*100)), flush=True)
 
     return float(np.mean(times)), float(np.mean(accs))
@@ -65,7 +65,7 @@ def evaluate():
     model = VGGModel(n_classes=config.n_classes)
     
     val_dataset = get_cifar100_dataset('./data/', False, download=True)
-    val_dataloader = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=False)
+    val_dataloader = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=False, num_workers=config.workers)
 
     save_file_path = os.path.join(config.save_dir, 'model.pth')
     model.load_state_dict(torch.load(save_file_path)['state_dict'])

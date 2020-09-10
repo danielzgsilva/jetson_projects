@@ -9,6 +9,7 @@ n_classes = 100
 
 n_epochs = 1000
 batch_size = 100
+workers = 2
 
 learning_rate = 1e-5
 weight_decay = 0.0#1e-7
