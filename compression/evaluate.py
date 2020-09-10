@@ -26,6 +26,11 @@ def validation(model, data_loader):
         # Get random input to pass as a sample to TensorRT
         x, _ = next(iter(data_loader))
 
+        if config.use_cuda:
+            x = x.cuda()
+        else:
+            raise RuntimeError('Cannot use TensorRT without CUDA')
+
         # Optimize
         model = torch2trt(model, [x])
     
