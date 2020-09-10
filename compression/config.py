@@ -3,6 +3,8 @@ from torch import cuda
 # This file contains the configuration parameters which will be used throughout your experiments
 use_cuda = cuda.is_available()
 
+use_tensorRT = True
+
 n_classes = 100
 
 n_epochs = 1000

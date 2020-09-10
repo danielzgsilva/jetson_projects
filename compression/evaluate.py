@@ -6,6 +6,9 @@ from model import VGGModel
 import os
 import time
 
+if config.use_tensorRT:
+    from torch2trt import torch2trt
+
 
 def get_accuracy(y_pred, y):
     y_argmax = torch.argmax(y_pred, -1)
@@ -18,6 +21,9 @@ def validation(model, data_loader):
 
     if config.use_cuda:
         model.cuda()
+
+    if config.use_tensorRT:
+        model = torch2trt(model, [])
 
     times, accs = [], []
     for i, sample in enumerate(data_loader):
@@ -37,7 +43,7 @@ def validation(model, data_loader):
 
         accs.append(acc.item())
 
-    print('Finished validation. Avg Time per Image: %.4f(micro-sec). Accuracy: %.4f.' % (float(np.mean(times)), float(np.mean(accs)*100)), flush=True)
+    print('Finished validation. Avg Time per Image: %.4f(micro-sec). Accuracy: %.4f' % (float(np.mean(times)), float(np.mean(accs)*100)), flush=True)
 
     return float(np.mean(times)), float(np.mean(accs))
     
