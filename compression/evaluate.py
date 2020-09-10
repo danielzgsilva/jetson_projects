@@ -23,12 +23,19 @@ def validation(model, data_loader):
         model.cuda()
 
     if config.use_tensorRT:
-        model = torch2trt(model, [])
+        # Get random input to pass as a sample to TensorRT
+        x, _ = next(iter(data_loader))
 
+        # Optimize
+        model = torch2trt(model, [x])
+    
+    total_imgs = 0
     times, accs = [], []
+
     for i, sample in enumerate(data_loader):
         x, y = sample
-
+        total_imgs += x.shape[0]
+        
         if config.use_cuda:
             x = x.cuda()
             y = y.cuda()
@@ -43,7 +50,8 @@ def validation(model, data_loader):
 
         accs.append(acc.item())
 
-    print('Finished validation. Avg Time per Image: %.4f(micro-sec). Accuracy: %.4f' % (float(np.mean(times)), float(np.mean(accs)*100)), flush=True)
+    print('Finished evaluating over % images \n'
+          'Avg Time per Image: %.4f(micro-sec). Accuracy: %.4f' % (total_imgs, float(np.mean(times)), float(np.mean(accs)*100)), flush=True)
 
     return float(np.mean(times)), float(np.mean(accs))
     
