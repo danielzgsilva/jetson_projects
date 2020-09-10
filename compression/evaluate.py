@@ -56,7 +56,12 @@ def evaluate():
 
     save_file_path = os.path.join(config.save_dir, 'model.pth')
     model.load_state_dict(torch.load(save_file_path)['state_dict'])
-    
+
+    if config.use_tensorRT:
+        print('Evaluating model using TensorRT')
+    else:
+        print('Evaluating model without using TensorRT')
+
     avg_time, avg_acc = validation(model, val_dataloader)
     
     
