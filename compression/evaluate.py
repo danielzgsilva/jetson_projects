@@ -84,7 +84,7 @@ def validation(model, data_loader, opts):
     
     avg_time, avg_acc = float(np.mean(all_times)), float(np.mean(all_accs))
     
-    print('-'*50)
+    print('-'*70)
     print('Final reuslts: Avg Time per Image: %.4f (micro-sec) Accuracy: %.4f' % (avg_time, avg_acc), flush=True)
     return avg_time, avg_acc
     
