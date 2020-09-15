@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import torchvision
 
 
 class Model(nn.Module):
@@ -41,8 +42,29 @@ class Model(nn.Module):
 def conv_layer(in_ch, out_ch, bn=False):
     return [nn.Conv2d(in_ch, out_ch, 3, padding=1), nn.BatchNorm2d(out_ch), nn.ReLU()]
 
-        
+
 class VGGModel(nn.Module):
+    def __init__(self, input_dim=(64, 64, 3), n_classes=10, pretrained=False, bn=True):
+        super(VGGModel2, self).__init__()
+
+        if bn:
+            vgg = torchvision.models.vgg16_bn(pretrained=pretrained)
+        else:
+            vgg = torchvision.models.vgg16(pretrained=pretrained)        
+
+        modules = list(vgg.children())
+
+        final_layers = list(modules[-1].children())[:-1] + [nn.Linear(in_features=4096, out_features=n_classes, bias=True)]   
+
+        all_layers = modules[:-1] + [nn.Flatten(), nn.Sequential(*final_layers)] 
+
+        self.vgg = nn.Sequential(*all_layers)
+        
+    def forward(self, x):
+        return self.vgg(x)
+
+        
+class VGGModel_old(nn.Module):
     def __init__(self, input_dim=(64, 64, 3), n_classes=10):
         super(VGGModel, self).__init__()
         h, w, ch = input_dim
