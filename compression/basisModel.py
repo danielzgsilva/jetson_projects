@@ -213,7 +213,7 @@ class baseModel(nn.Module):
         super(baseModel, self).cuda(device)
         for m in self.model.modules():
             if isinstance(m, basisConv2d) or isinstance(m, basisLinear):
-                m.cpu()
+                #m.cpu()
                 m.cuda()
 
     def cpu(self):

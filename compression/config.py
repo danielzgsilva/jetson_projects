@@ -5,7 +5,7 @@ use_cuda = cuda.is_available()
 
 n_classes = 100
 
-n_epochs = 1000
+n_epochs = 40
 batch_size = 100
 workers = 2
 
