@@ -8,6 +8,9 @@ import torch.optim as optim
 from model import VGGModel
 import os
 from basisModel import basisModel, display_stats
+from options import Options
+
+opts = Options().parse()
 
 def get_accuracy(y_pred, y):
     y_argmax = torch.argmax(y_pred, -1)
@@ -81,7 +84,7 @@ def validation(model, data_loader, criterion):
     return float(np.mean(losses)), float(np.mean(accs))
 
 
-def run_experiment():
+def run_experiment(opts):
     model = VGGModel(n_classes=config.n_classes)
 
     criterion = nn.CrossEntropyLoss(reduction='mean')
@@ -92,8 +95,8 @@ def run_experiment():
     model.load_state_dict(torch.load(load_file_path)['state_dict'])
 
     # creates the basis model
-    model = basisModel(model, True, True, True)#basisModel(model, opts.use_weights, opts.add_bn, opts.fixed_basbs)
-    model.update_channels(0.8)
+    model = basisModel(model, opts.use_weights, opts.add_bn, opts.fixed_basbs)
+    model.update_channels(opts.compress_factor)
     
     display_stats(model, (64,64))
 
@@ -120,8 +123,8 @@ def run_experiment():
             best_loss = losses
 
             #save_file_path = os.path.join(config.save_dir, 'model_{}_{:.4f}.pth'.format(epoch, losses))
-            save_file_state = os.path.join(config.save_dir, 'compressed_model_state.pth')
-            save_file_path = os.path.join(config.save_dir, 'compressed_model.pth')
+            save_file_state = os.path.join(config.save_dir, opts.finetune_model_name + '_state.pth')
+            save_file_path = os.path.join(config.save_dir, opts.finetune_model_name + '.pth')
             
             states = {
                 'epoch': epoch + 1,
@@ -143,4 +146,4 @@ def run_experiment():
 
 
 if __name__ == '__main__':
-    run_experiment()
+    run_experiment(opts)
