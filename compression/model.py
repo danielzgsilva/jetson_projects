@@ -45,7 +45,7 @@ def conv_layer(in_ch, out_ch, bn=False):
 
 class VGGModel(nn.Module):
     def __init__(self, input_dim=(64, 64, 3), n_classes=10, pretrained=False, bn=True):
-        super(VGGModel2, self).__init__()
+        super(VGGModel, self).__init__()
 
         if bn:
             vgg = torchvision.models.vgg16_bn(pretrained=pretrained)

@@ -120,19 +120,23 @@ def run_experiment():
             best_loss = losses
 
             #save_file_path = os.path.join(config.save_dir, 'model_{}_{:.4f}.pth'.format(epoch, losses))
-            save_file_path = os.path.join(config.save_dir, 'model.pth')
+            save_file_state = os.path.join(config.save_dir, 'compressed_model_state.pth')
+            save_file_path = os.path.join(config.save_dir, 'compressed_model.pth')
+            
             states = {
                 'epoch': epoch + 1,
                 'state_dict': model.state_dict(),
                 'optimizer': optimizer.state_dict(),
             }
 
+            
             try:
                 os.mkdir(config.save_dir)
             except:
                 pass
-
-            torch.save(states, save_file_path)
+            
+            torch.save(model, save_file_path)
+            torch.save(states, save_file_state)
             print('Model saved ', str(save_file_path), flush=True)
 
         print('Training Finished') 
