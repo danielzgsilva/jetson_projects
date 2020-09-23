@@ -7,8 +7,12 @@ class Options:
     def __init__(self):
         self.parser = argparse.ArgumentParser(description="Evaluation options")
 
-        self.parser.add_argument('--model', type=str, help='model to evaluate')
-        self.parser.add_argument('--finetune_model_name', type=str)
+        self.parser.add_argument('--save_dir', type=str, default=os.path.join(file_dir, 'SavedModels', 'Run2'), help='directory to save or load from')
+        self.parser.add_argument('--model', type=str, default='model.pth', help='model name')
+        self.parser.add_argument('--load_state_dict', action='store_true', help='set true to load model as a state dict')
+        self.parser.add_argument('--use_vgg_old', action='store_true', help='use hand-written VGG architecture')
+
+        self.parser.add_argument('--finetune_model_name', type=str, help='name to give finetuned model')
 	
         self.parser.add_argument('--n', type=int, default=5, help='Number of times to evaluate on test set. Results are averaged over all runs')
         

@@ -1,15 +1,19 @@
+import os
+
+
+#os.environ['CUDA_LAUNCH_BLOCKING']='1'
+
 import config
 import torch
 import numpy as np
 from dataloader import TrainDataset, ValidationDataset, DataLoader, get_cifar100_dataset
-from model import VGGModel
-import os
+from model import VGGModel, VGGModel_old
 import time
 
 from basisModel import basisModel, display_stats
-from options import EvalOptions
+from options import Options
 
-opts = EvalOptions().parse()
+opts = Options().parse()
 
 if opts.tensorRT:
     from torch2trt import torch2trt
@@ -28,7 +32,6 @@ def validation(model, data_loader, opts):
         print('Compressing model with basis filter algorithm, compression factor of {}'.format(opts.compress_factor))
         model = basisModel(model, opts.use_weights, opts.add_bn, opts.fixed_basbs)
         model.update_channels(opts.compress_factor)
-        
         display_stats(model, (64,64))
 
     else:
@@ -36,7 +39,7 @@ def validation(model, data_loader, opts):
     
     if config.use_cuda:
         model.cuda()
-
+    
     if opts.tensorRT:
         print('Optimizing model with TensorRT')
 
@@ -49,11 +52,21 @@ def validation(model, data_loader, opts):
             raise RuntimeError('Cannot use TensorRT without CUDA')
 
         # Optimize
-        model = torch2trt(model, [x], max_batch_size=config.batch_size)
+        trt_model = torch2trt(model, [x], max_batch_size=config.batch_size)
+
+        del model
+        del x
+        torch.cuda.empty_cache()
+        model = trt_model
+        model.cuda()
+
     else:
         print('No TensorRT')
     
-    
+    print('memory usage:')
+    print(torch.cuda.memory_allocated())
+    print(torch.cuda.memory_summary())
+ 
     print('Evaluating model with {} iterations over {} images'.format(opts.n, len(data_loader)*config.batch_size))
     all_times, all_accs = [], []
 
@@ -82,7 +95,7 @@ def validation(model, data_loader, opts):
         all_accs.append(iteration_acc)
         print('Iteration %d: Avg Time per Image: %.4f (micro-sec) Accuracy: %.4f' % (i, iteration_time, iteration_acc), flush=True)
     
-    avg_time, avg_acc = float(np.mean(all_times)), float(np.mean(all_accs))
+    avg_time, avg_acc = float(np.mean(all_times[1:])), float(np.mean(all_accs))
     
     print('-'*70)
     print('Final reuslts: Avg Time per Image: %.4f (micro-sec) Accuracy: %.4f' % (avg_time, avg_acc), flush=True)
@@ -90,16 +103,24 @@ def validation(model, data_loader, opts):
     
 
 def evaluate(opts):
-    model = VGGModel(n_classes=config.n_classes)
-    
     val_dataset = get_cifar100_dataset('./data/', False, download=True)
     val_dataloader = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=False, num_workers=config.workers)
-
-    save_file_path = os.path.join(config.save_dir, 'model.pth')
-    model.load_state_dict(torch.load(save_file_path)['state_dict'])
-
-    avg_time, avg_acc = validation(model, val_dataloader, opts)
     
+    save_file_path = os.path.join(opts.save_dir, opts.model)
+
+    if opts.load_state_dict:
+        if opts.use_vgg_old:
+            model = VGGModel_old(n_classes=config.n_classes)
+        else:
+            model = VGGModel(n_classes=config.n_classes)
+
+        model.load_state_dict(torch.load(save_file_path)['state_dict'])
+
+    else:
+        model = torch.load(save_file_path)
+    
+    avg_time, avg_acc = validation(model, val_dataloader, opts)
+     
     
 if __name__ == '__main__':
     evaluate(opts)
