@@ -66,7 +66,7 @@ class VGGModel(nn.Module):
         
 class VGGModel_old(nn.Module):
     def __init__(self, input_dim=(64, 64, 3), n_classes=10):
-        super(VGGModel, self).__init__()
+        super(VGGModel_old, self).__init__()
         h, w, ch = input_dim
         self.n_classes = n_classes
 
