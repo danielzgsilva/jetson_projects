@@ -81,7 +81,7 @@ class FlirDataset(Dataset):
 
         assert annotations['image']['file_name'] == img_file.split('/')[-1].split('.')[0]
 
-        print(json.dump(annotations['annotation']))
+        print(json.dumps(annotations['annotation']))
         print(len(annotations['annotation']))
 
         height = annotations['image']['height']
