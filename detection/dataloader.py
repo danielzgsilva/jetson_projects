@@ -61,7 +61,7 @@ class FlirDataset(Dataset):
 
         with open(annot_file) as json_file:
             annotations = json.load(json_file)
-	
+
         assert annotations['image']['file_name'] == img_file.split('/')[-1].split('.')[0]
 
         print(annotations['annotation'])
@@ -81,7 +81,7 @@ class FlirDataset(Dataset):
             bbox[3] = min(bbox[1] + bbox[3], height)
 
             annot_dict['boxes'].append(bbox)
-            annot_dict['labels'].append(obj['category_id'])
+            annot_dict['labels'].append(int(obj['category_id']) - 1)
 
         annot_dict['boxes'] = torch.tensor(annot_dict['boxes'])
         annot_dict['labels'] = torch.tensor(annot_dict['labels'])
