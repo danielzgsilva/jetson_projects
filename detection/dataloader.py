@@ -8,9 +8,8 @@ from PIL import Image as pil
 
 
 class FlirDataset(Dataset):
-    def __init__(self, data_root, validation=False, transforms=None):
-        # self.data_root = data_root
-        self.data_root = '/groups/mshah/data/FLIR'
+    def __init__(self, data_root='/groups/mshah/data/FLIR', validation=False, transforms=None):
+        self.data_root = data_root
         self.img_files = []
         self.annot_files = []
 
@@ -66,3 +65,16 @@ class FlirDataset(Dataset):
 
         print(annotations)
 
+        return img, annotations
+
+
+if __name__ == "__main__":
+    # testing dataset
+    dataset = FlirDataset
+
+    bs = 12
+    workers = 8
+    dataloader = DataLoader(dataset, batch_size=bs, shuffle=True, num_workers=workers, pin_memory=True, drop_last=True)
+
+    for batch_idx, (inputs, annotations) in enumerate(dataloader):
+        pass
