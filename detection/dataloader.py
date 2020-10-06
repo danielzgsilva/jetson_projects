@@ -8,7 +8,7 @@ import json
 from PIL import Image as pil
 
 
-def load(self, path):
+def load(path):
     with open(path, 'rb') as f:
         with pil.open(f) as img:
             return img.convert('RGB')
