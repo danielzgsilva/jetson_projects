@@ -1,3 +1,4 @@
+import torch.tensor
 from torch.utils.data import Dataset
 from torch.utils.data import DataLoader
 from torchvision.transforms import ToTensor
@@ -62,19 +63,30 @@ class FlirDataset(Dataset):
             annotations = json.load(json_file)
 	
         assert annotations['image']['file_name'] == img_file.split('/')[-1].split('.')[0]
+
         print(annotations['annotation'])
         print(len(annotations['annotation']))
-
         print(annotations['annotation'][0].keys())
-        
-        h = annotations['image']['height']
-        w = annotations['image']['width']
+
+        height = annotations['image']['height']
+        width = annotations['image']['width']
 
         # build annotation dict
-        ret = {'boxes': [], 'labels': []}
-        for i in
+        annot_dict = {'boxes': [], 'labels': []}
+        for obj in annotations['annotation']:
+            bbox = obj['bbox']
 
-        return img, annotations
+            # convert from xywh to xyxy bbox format
+            bbox[2] = min(bbox[0] + bbox[2], width)
+            bbox[3] = min(bbox[1] + bbox[3], height)
+
+            annot_dict['boxes'].append(bbox)
+            annot_dict['labels'].append(obj['category_id'])
+
+        annot_dict['bbox'] = torch.tensor(annot_dict['bbox'])
+        annot_dict['labels'] = torch.tensor(annot_dict['labels'])
+
+        return img, annot_dict
 
 
 if __name__ == "__main__":
@@ -87,4 +99,7 @@ if __name__ == "__main__":
 
     for batch_idx, (inputs, annotations) in enumerate(dataloader):
         print(inputs.size())
+        print(annotations[0]['bboxes'].size())
+        print(annotations[0]['labels'].size())
+        print(annotations[0])
         break
