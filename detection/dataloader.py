@@ -72,23 +72,25 @@ class FlirDataset(Dataset):
         width = annotations['image']['width']
 
         # build annotation dict
-        annot_dict = {'boxes': [], 'labels': []}
+        boxes = []
+        labels = []
         for obj in annotations['annotation']:
-            bbox = obj['bbox']
+            bbox = list(obj['bbox'])
 
             # convert from xywh to xyxy bbox format
             bbox[2] = min(bbox[0] + bbox[2], width)
             bbox[3] = min(bbox[1] + bbox[3], height)
 
-            annot_dict['boxes'].append(bbox)
-            annot_dict['labels'].append(int(obj['category_id']) - 1)
+            boxes.append(bbox)
+            labels.append(int(obj['category_id']) - 1)
 
-        annot_dict['boxes'] = torch.tensor(annot_dict['boxes'])
-        annot_dict['labels'] = torch.tensor(annot_dict['labels'])
+        target = {}
+        target['boxes'] = torch.as_tensor(boxes, dtype=torch.float32)
+        target['labels'] = torch.as_tensor(labels, dtype=torch.int64)
 
-        print(annot_dict['boxes'].size())
-        print(annot_dict['labels'].size())
-        return img, annot_dict
+        print(target['boxes'].size())
+        print(target['labels'].size())
+        return img, target
 
 
 if __name__ == "__main__":
@@ -99,9 +101,9 @@ if __name__ == "__main__":
     workers = 0
     dataloader = DataLoader(dataset, batch_size=bs, shuffle=True, num_workers=workers, pin_memory=True, drop_last=True)
 
-    for batch_idx, (inputs, annotations) in enumerate(dataloader):
+    for batch_idx, (inputs, targets) in enumerate(dataloader):
         print(inputs.size())
-        print(annotations[0]['boxes'].size())
-        print(annotations[0]['labels'].size())
-        print(annotations[0])
+        print(targets[0]['boxes'].size())
+        print(targets[0]['labels'].size())
+        print(targets[0])
         break
