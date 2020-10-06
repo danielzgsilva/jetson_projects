@@ -8,6 +8,28 @@ import json
 from PIL import Image as pil
 
 
+def load(self, path):
+    with open(path, 'rb') as f:
+        with pil.open(f) as img:
+            return img.convert('RGB')
+
+
+def collate_fn(batch):
+    images = list()
+    boxes = list()
+    labels = list()
+    difficulties = list()
+
+    for b in batch:
+        images.append(b[0])
+        boxes.append(b[1])
+        labels.append(b[2])
+
+    images = torch.stack(images, dim=0)
+
+    return images, boxes, labels
+
+
 class FlirDataset(Dataset):
     def __init__(self, data_root='/groups/mshah/data/FLIR/pre_dat', validation=False, transforms=None):
         self.data_root = data_root
@@ -44,11 +66,6 @@ class FlirDataset(Dataset):
         print('Image files: {} Annotation files: {}'.format(len(self.img_files), len(self.annot_files)))
         assert len(self.img_files) == len(self.annot_files)
 
-    def load(self, path):
-        with open(path, 'rb') as f:
-            with pil.open(f) as img:
-                return img.convert('RGB')
-
     def __len__(self):
         return len(self.img_files)
 
@@ -56,7 +73,7 @@ class FlirDataset(Dataset):
         img_file = self.img_files[index]
         annot_file = self.annot_files[index]
 
-        img = self.load(img_file)
+        img = load(img_file)
         img = self.transforms(img)
 
         with open(annot_file) as json_file:
@@ -100,7 +117,8 @@ if __name__ == "__main__":
 
     bs = 2
     workers = 0
-    dataloader = DataLoader(dataset, batch_size=bs, shuffle=True, num_workers=workers, pin_memory=True, drop_last=True)
+    dataloader = DataLoader(dataset, batch_size=bs, shuffle=True, num_workers=workers,
+                            pin_memory=True, drop_last=True, collate_fn=collate_fn)
 
     for batch_idx, (inputs, targets) in enumerate(dataloader):
         print(inputs.size())
