@@ -108,7 +108,7 @@ if __name__ == "__main__":
     dataloader = DataLoader(dataset, batch_size=bs, shuffle=True, num_workers=workers,
                             pin_memory=True, drop_last=True, collate_fn=collate_fn)
 
-    for batch_idx, (inputs, targets) in enumerate(dataloader):
-        print(inputs.size())
-        print(targets.size())
+    for batch_idx, (images, targets) in enumerate(dataloader):
+        print(len(images))
+        print(targets)
         break
