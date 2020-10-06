@@ -97,10 +97,12 @@ class FlirDataset(Dataset):
         target['area'] = torch.as_tensor(area, dtype=torch.float32)
         target['iscrowd'] = torch.as_tensor(iscrowd, dtype=torch.int64)
         target['labels'] = torch.as_tensor(labels, dtype=torch.int64)
-        target['image_id'] = annotations['image']['image_id']
+        target['image_id'] = torch.tensor([annotations['image']['id']])
 
         print(target['boxes'].size())
+        print(target['area'].size())
         print(target['labels'].size())
+        print(target['iscrowd'].size())
         return img, target
 
 
