@@ -19,21 +19,21 @@ class FlirDataset(Dataset):
 
         # Get all image file names
         if validation:
-            val_files = os.listdir(os.path.join(self.path, 'valid/PreviewData/'))
+            val_files = os.listdir(os.path.join(self.data_root, 'valid/PreviewData/'))
             val_files.sort()
-            self.img_files.extend(os.path.join(self.path, 'valid/PreviewData/') +
-                                      file for file in val_files)
+            self.img_files.extend(os.path.join(self.data_root, 'valid/PreviewData/') +
+                                  file for file in val_files)
 
         else:
-            train_files = os.listdir(os.path.join(self.path, 'train/PreviewData/'))
+            train_files = os.listdir(os.path.join(self.data_root, 'train/PreviewData/'))
             train_files.sort()
-            self.img_files.extend(os.path.join(self.path, 'train/PreviewData/') +
-                                        file for file in train_files)
+            self.img_files.extend(os.path.join(self.data_root, 'train/PreviewData/') +
+                                  file for file in train_files)
 
-            video_files = os.listdir(os.path.join(self.path, 'video/PreviewData/'))
+            video_files = os.listdir(os.path.join(self.data_root, 'video/PreviewData/'))
             video_files.sort()
-            self.img_files.extend(os.path.join(self.path, 'video/PreviewData/') +
-                                        file for file in video_files)
+            self.img_files.extend(os.path.join(self.data_root, 'video/PreviewData/') +
+                                  file for file in video_files)
 
         # Get annotation file names
         for file in self.img_files:
