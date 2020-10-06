@@ -70,7 +70,7 @@ class FlirDataset(Dataset):
 
 if __name__ == "__main__":
     # testing dataset
-    dataset = FlirDataset
+    dataset = FlirDataset()
 
     bs = 12
     workers = 8
