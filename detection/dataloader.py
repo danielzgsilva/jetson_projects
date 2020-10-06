@@ -16,18 +16,15 @@ def load(path):
 
 def collate_fn(batch):
     images = list()
-    boxes = list()
-    labels = list()
-    difficulties = list()
+    targets = list()
 
     for b in batch:
         images.append(b[0])
-        boxes.append(b[1])
-        labels.append(b[2])
+        targets.append(b[1])
 
     images = torch.stack(images, dim=0)
 
-    return images, boxes, labels
+    return images, targets
 
 
 class FlirDataset(Dataset):
