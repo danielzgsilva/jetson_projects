@@ -69,15 +69,17 @@ class FlirDataset(Dataset):
 
         assert annotations['image']['file_name'] == img_file.split('/')[-1].split('.')[0]
 
-        print(json.dumps(annotations['annotation']))
+        print(json.dumps(annotations))
         print(len(annotations['annotation']))
 
         height = annotations['image']['height']
         width = annotations['image']['width']
 
-        # build annotation dict
         boxes = []
+        area = []
+        iscrowd = []
         labels = []
+
         for obj in annotations['annotation']:
             bbox = list(obj['bbox'])
 
@@ -86,16 +88,19 @@ class FlirDataset(Dataset):
             bbox[3] = min(bbox[1] + bbox[3], height)
 
             boxes.append(bbox)
+            area.append(obj['area'])
+            iscrowd.append(obj['iscrowd'])
             labels.append(int(obj['category_id']) - 1)
 
         target = dict()
         target['boxes'] = torch.as_tensor(boxes, dtype=torch.float32)
+        target['area'] = torch.as_tensor(area, dtype=torch.float32)
+        target['iscrowd'] = torch.as_tensor(iscrowd, dtype=torch.int64)
         target['labels'] = torch.as_tensor(labels, dtype=torch.int64)
+        target['image_id'] = annotations['image']['image_id']
 
         print(target['boxes'].size())
         print(target['labels'].size())
-        print(target['boxes'])
-        print(target['labels'])
         return img, target
 
 
@@ -108,7 +113,12 @@ if __name__ == "__main__":
     dataloader = DataLoader(dataset, batch_size=bs, shuffle=True, num_workers=workers,
                             pin_memory=True, drop_last=True, collate_fn=collate_fn)
 
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
     for batch_idx, (images, targets) in enumerate(dataloader):
+        images = list(image.to(device) for image in images)
+        targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
+
         print(len(images))
         print(targets)
         break
