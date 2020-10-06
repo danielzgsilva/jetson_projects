@@ -70,7 +70,7 @@ if __name__ == "__main__":
     # testing dataset
     dataset = FlirDataset()
 
-    bs = 12
+    bs = 1
     workers = 8
     dataloader = DataLoader(dataset, batch_size=bs, shuffle=True, num_workers=workers, pin_memory=True, drop_last=True)
 
