@@ -8,7 +8,7 @@ from PIL import Image as pil
 
 
 class FlirDataset(Dataset):
-    def __init__(self, data_root='/groups/mshah/data/FLIR', validation=False, transforms=None):
+    def __init__(self, data_root='/groups/mshah/data/FLIR/pre_dat', validation=False, transforms=None):
         self.data_root = data_root
         self.img_files = []
         self.annot_files = []
