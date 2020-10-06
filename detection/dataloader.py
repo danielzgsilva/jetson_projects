@@ -83,7 +83,7 @@ class FlirDataset(Dataset):
             annot_dict['boxes'].append(bbox)
             annot_dict['labels'].append(obj['category_id'])
 
-        annot_dict['bbox'] = torch.tensor(annot_dict['bbox'])
+        annot_dict['boxes'] = torch.tensor(annot_dict['bbox'])
         annot_dict['labels'] = torch.tensor(annot_dict['labels'])
 
         return img, annot_dict
@@ -99,7 +99,7 @@ if __name__ == "__main__":
 
     for batch_idx, (inputs, annotations) in enumerate(dataloader):
         print(inputs.size())
-        print(annotations[0]['bboxes'].size())
+        print(annotations[0]['boxes'].size())
         print(annotations[0]['labels'].size())
         print(annotations[0])
         break
