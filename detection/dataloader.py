@@ -86,6 +86,8 @@ class FlirDataset(Dataset):
         annot_dict['boxes'] = torch.tensor(annot_dict['boxes'])
         annot_dict['labels'] = torch.tensor(annot_dict['labels'])
 
+        print(annot_dict['boxes'].size())
+        print(annot_dict['labels'].size())
         return img, annot_dict
 
 
@@ -93,7 +95,7 @@ if __name__ == "__main__":
     # testing dataset
     dataset = FlirDataset()
 
-    bs = 1
+    bs = 2
     workers = 0
     dataloader = DataLoader(dataset, batch_size=bs, shuffle=True, num_workers=workers, pin_memory=True, drop_last=True)
 
