@@ -1,6 +1,6 @@
 from torch.utils.data import Dataset
 from torch.utils.data import DataLoader
-from torchvision import transforms
+from torchvision.transforms import ToTensor
 
 import os
 import json
@@ -15,7 +15,7 @@ class FlirDataset(Dataset):
 
         self.transforms = transforms
         if self.transforms is None:
-            self.transforms = transforms.ToTensor()
+            self.transforms = ToTensor()
 
         # Get all image file names
         if validation:
