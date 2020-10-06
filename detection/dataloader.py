@@ -23,6 +23,7 @@ def collate_fn(batch):
         targets.append(b[1])
 
     images = torch.stack(images, dim=0)
+    targets = torch.stack(targets, dim=0)
 
     return images, targets
 
