@@ -61,7 +61,8 @@ class FlirDataset(Dataset):
         with open(annot_file) as json_file:
             annotations = json.load(json_file)
 
-        print(annotations)
+        print(len(annotations))
+        print(annotations[0].keys())
 
         return img, annotations
 
