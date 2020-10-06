@@ -64,9 +64,8 @@ class FlirDataset(Dataset):
 
         assert annotations['image']['file_name'] == img_file.split('/')[-1].split('.')[0]
 
-        print(annotations['annotation'])
+        print(json.dump(annotations['annotation']))
         print(len(annotations['annotation']))
-        print(annotations['annotation'][0].keys())
 
         height = annotations['image']['height']
         width = annotations['image']['width']
@@ -84,12 +83,14 @@ class FlirDataset(Dataset):
             boxes.append(bbox)
             labels.append(int(obj['category_id']) - 1)
 
-        target = {}
+        target = dict()
         target['boxes'] = torch.as_tensor(boxes, dtype=torch.float32)
         target['labels'] = torch.as_tensor(labels, dtype=torch.int64)
 
         print(target['boxes'].size())
         print(target['labels'].size())
+        print(target['boxes'])
+        print(target['labels'])
         return img, target
 
 
@@ -103,7 +104,5 @@ if __name__ == "__main__":
 
     for batch_idx, (inputs, targets) in enumerate(dataloader):
         print(inputs.size())
-        print(targets[0]['boxes'].size())
-        print(targets[0]['labels'].size())
-        print(targets[0])
+        print(targets.size())
         break
