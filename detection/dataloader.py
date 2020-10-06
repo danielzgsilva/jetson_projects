@@ -60,9 +60,19 @@ class FlirDataset(Dataset):
 
         with open(annot_file) as json_file:
             annotations = json.load(json_file)
+	
+        assert annotations['image']['file_name'] == img_file.split('/')[-1].split('.')[0]
+        print(annotations['annotation'])
+        print(len(annotations['annotation']))
 
-        print(len(annotations))
-        print(annotations[0].keys())
+        print(annotations['annotation'][0].keys())
+        
+        h = annotations['image']['height']
+        w = annotations['image']['width']
+
+        # build annotation dict
+        ret = {'boxes': [], 'labels': []}
+        for i in
 
         return img, annotations
 
@@ -72,7 +82,7 @@ if __name__ == "__main__":
     dataset = FlirDataset()
 
     bs = 1
-    workers = 8
+    workers = 0
     dataloader = DataLoader(dataset, batch_size=bs, shuffle=True, num_workers=workers, pin_memory=True, drop_last=True)
 
     for batch_idx, (inputs, annotations) in enumerate(dataloader):
