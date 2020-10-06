@@ -58,8 +58,6 @@ class FlirDataset(Dataset):
         img = self.load(img_file)
         img = self.transforms(img)
 
-        print(img.size())
-
         with open(annot_file) as json_file:
             annotations = json.load(json_file)
 
@@ -77,4 +75,5 @@ if __name__ == "__main__":
     dataloader = DataLoader(dataset, batch_size=bs, shuffle=True, num_workers=workers, pin_memory=True, drop_last=True)
 
     for batch_idx, (inputs, annotations) in enumerate(dataloader):
-        pass
+        print(inputs.size())
+        break
