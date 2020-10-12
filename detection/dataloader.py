@@ -52,6 +52,20 @@ class FlirDataset(Dataset):
             self.annot_files.append(annot_file)
 
         print('Image files: {} Annotation files: {}'.format(len(self.img_files), len(self.annot_files)))
+
+        imgs, anns = [], []
+        if validation:
+            for i in range(len(self.annot_files)):
+                if len(json.load(open(self.annot_files[i]))['annotation']) == 0:
+                    continue
+                else:
+                    imgs.append(self.img_files[i])
+                    anns.append(self.annot_files[i])
+            self.img_files = imgs
+            self.annot_files = anns
+
+        print('Image files: {} Annotation files: {}'.format(len(self.img_files), len(self.annot_files)))
+         
         assert len(self.img_files) == len(self.annot_files)
 
     def __len__(self):
@@ -78,6 +92,10 @@ class FlirDataset(Dataset):
         labels = []
 
         for obj in annotations['annotation']:
+            if int(obj['category_id']) > 5:
+                #print(int(obj['category_id']), flush=True)
+                continue
+
             bbox = list(obj['bbox'])
 
             # convert from xywh to xyxy bbox format
@@ -87,10 +105,10 @@ class FlirDataset(Dataset):
             boxes.append(bbox)
             area.append(obj['area'])
             iscrowd.append(obj['iscrowd'])
-            labels.append(int(obj['category_id']) - 1)
+            labels.append(int(obj['category_id'])) # include -1 for Run2
 
         target = dict()
-        target['boxes'] = torch.as_tensor(boxes, dtype=torch.float32)
+        target['boxes'] = torch.as_tensor(boxes, dtype=torch.float32)#.reshape(-1, 4)
         target['area'] = torch.as_tensor(area, dtype=torch.float32)
         target['iscrowd'] = torch.as_tensor(iscrowd, dtype=torch.int64)
         target['labels'] = torch.as_tensor(labels, dtype=torch.int64)
