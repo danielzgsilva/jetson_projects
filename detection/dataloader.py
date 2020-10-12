@@ -51,8 +51,6 @@ class FlirDataset(Dataset):
             annot_file = file.replace('PreviewData', 'Annotations').replace('.jpeg', '.json')
             self.annot_files.append(annot_file)
 
-        print('Image files: {} Annotation files: {}'.format(len(self.img_files), len(self.annot_files)))
-
         imgs, anns = [], []
         if validation:
             for i in range(len(self.annot_files)):
