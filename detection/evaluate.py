@@ -89,7 +89,7 @@ if opts.tensorRT:
 def validation(opts):
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
-    val_dataset = FlirDataset(validation=True)
+    val_dataset = FlirDataset(data_root=opts.data_root, validation=True)
     val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=10, shuffle=False, num_workers=4,
                                                    collate_fn=utils.collate_fn_tr)
 

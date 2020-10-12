@@ -6,7 +6,7 @@ file_dir = os.path.dirname(__file__)
 class Options:
     def __init__(self):
         self.parser = argparse.ArgumentParser(description="Evaluation options")
-
+        self.parser.add_argument('--data_root', type=str, default=os.path.join(file_dir, 'FLIR', 'pre_dat'))
         self.parser.add_argument('--save_dir', type=str, default=os.path.join(file_dir, 'SavedModels', 'Run3'), help='directory to save or load from')
         self.parser.add_argument('--model', type=str, default='model.pth', help='model name')
         self.parser.add_argument('--load_state_dict', action='store_true', help='set true to load model as a state dict')
