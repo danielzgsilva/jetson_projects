@@ -49,6 +49,7 @@ class CocoEvaluator(object):
     def synchronize_between_processes(self):
         for iou_type in self.iou_types:
             self.eval_imgs[iou_type] = np.concatenate(self.eval_imgs[iou_type], 2)
+            # print(self.eval_imgs[iou_type].shape)
             create_common_coco_eval(self.coco_eval[iou_type], self.img_ids, self.eval_imgs[iou_type])
 
     def accumulate(self):
@@ -59,7 +60,9 @@ class CocoEvaluator(object):
         for iou_type, coco_eval in self.coco_eval.items():
             print("IoU metric: {}".format(iou_type))
             coco_eval.summarize()
-
+            print('Tester')
+            summarize_tester(coco_eval, 1)
+            
     def prepare(self, predictions, iou_type):
         if iou_type == "bbox":
             return self.prepare_for_coco_detection(predictions)
@@ -154,6 +157,42 @@ class CocoEvaluator(object):
                 ]
             )
         return coco_results
+
+def summarize_tester(c_eval, ap=1, iouThr=None, areaRng='all', maxDets=100 ):
+    p = c_eval.params
+    iStr = ' {:<18} {} @[ IoU={:<9} | area={:>6s} | maxDets={:>3d} ] = {:0.3f}'
+    titleStr = 'Average Precision' if ap == 1 else 'Average Recall'
+    typeStr = '(AP)' if ap==1 else '(AR)'
+    iouStr = '{:0.2f}:{:0.2f}'.format(p.iouThrs[0], p.iouThrs[-1]) \
+        if iouThr is None else '{:0.2f}'.format(iouThr)
+    
+    aind = [i for i, aRng in enumerate(p.areaRngLbl) if aRng == areaRng]
+    mind = [i for i, mDet in enumerate(p.maxDets) if mDet == maxDets]
+    if ap == 1:
+        # dimension of precision: [TxRxKxAxM]
+        s = c_eval.eval['precision']
+        # IoU
+        if iouThr is not None:
+            t = np.where(iouThr == p.iouThrs)[0]
+            s = s[t]
+        s = s[:,:,:,aind,mind]
+    else:
+        # dimension of recall: [TxKxAxM]
+        s = c_eval.eval['recall']
+        if iouThr is not None:
+            t = np.where(iouThr == p.iouThrs)[0]
+            s = s[t]
+        s = s[:,:,aind,mind]
+    if len(s[s>-1])==0:
+        mean_s = -1
+    else:
+        #print(s.shape)
+        print('Class Scores:', np.mean(s, (0, 1, 3)))
+        #print(s[s>-1].shape)
+        #print(s[s>-1])
+        mean_s = np.mean(s[s>-1])
+    print(iStr.format(titleStr, typeStr, iouStr, areaRng, maxDets, mean_s))
+    return mean_s
 
 
 def convert_to_xywh(boxes):
@@ -340,6 +379,7 @@ def evaluate(self):
     ]
     # this is NOT in the pycocotools code, but could be done outside
     evalImgs = np.asarray(evalImgs).reshape(len(catIds), len(p.areaRng), len(p.imgIds))
+    print(evalImgs.shape)
     self._paramsEval = copy.deepcopy(self.params)
     # toc = time.time()
     # print('DONE (t={:0.2f}s).'.format(toc-tic))
