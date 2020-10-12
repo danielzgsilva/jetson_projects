@@ -1,0 +1,35 @@
+{
+    "annotation": [
+        {
+            "area": 38628,
+            "bbox": [
+                316,
+                185,
+                222,
+                174
+            ],
+            "category_id": "3",
+            "id": 1,
+            "image_id": 9837,
+            "iscrowd": 0,
+            "segmentation": [
+                [
+                    316,
+                    185,
+                    316,
+                    359,
+                    538,
+                    359,
+                    538,
+                    185
+                ]
+            ]
+        }
+    ],
+    "image": {
+        "file_name": "FLIR_09837",
+        "height": 512,
+        "id": 9837,
+        "width": 640
+    }
+}

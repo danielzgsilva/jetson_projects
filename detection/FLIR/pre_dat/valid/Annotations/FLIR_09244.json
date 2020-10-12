@@ -1,0 +1,60 @@
+{
+    "annotation": [
+        {
+            "area": 1320,
+            "bbox": [
+                366,
+                206,
+                22,
+                60
+            ],
+            "category_id": "1",
+            "id": 1,
+            "image_id": 9244,
+            "iscrowd": 0,
+            "segmentation": [
+                [
+                    366,
+                    206,
+                    366,
+                    266,
+                    388,
+                    266,
+                    388,
+                    206
+                ]
+            ]
+        },
+        {
+            "area": 6204,
+            "bbox": [
+                97,
+                210,
+                94,
+                66
+            ],
+            "category_id": "3",
+            "id": 2,
+            "image_id": 9244,
+            "iscrowd": 0,
+            "segmentation": [
+                [
+                    97,
+                    210,
+                    97,
+                    276,
+                    191,
+                    276,
+                    191,
+                    210
+                ]
+            ]
+        }
+    ],
+    "image": {
+        "file_name": "FLIR_09244",
+        "height": 512,
+        "id": 9244,
+        "width": 640
+    }
+}
