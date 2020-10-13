@@ -2,7 +2,7 @@ import torch.tensor
 from torch.utils.data import Dataset
 from torch.utils.data import DataLoader
 from torchvision.transforms import ToTensor
-
+import numpy as np
 import os
 import json
 from PIL import Image as pil
@@ -51,6 +51,13 @@ class FlirDataset(Dataset):
             annot_file = file.replace('PreviewData', 'Annotations').replace('.jpeg', '.json')
             self.annot_files.append(annot_file)
 
+        print('Image files: {} Annotation files: {}'.format(len(self.img_files), len(self.annot_files)))
+        '''
+        lbls = []
+        for i in range(len(self.annot_files)):
+            lbls += [x['category_id'] for x in json.load(open(self.annot_files[i]))['annotation']]
+        print(np.unique(lbls, return_counts=True))
+        '''
         imgs, anns = [], []
         if validation:
             for i in range(len(self.annot_files)):
@@ -90,9 +97,9 @@ class FlirDataset(Dataset):
         labels = []
 
         for obj in annotations['annotation']:
-            if int(obj['category_id']) > 5:
-                #print(int(obj['category_id']), flush=True)
-                continue
+            obj_id = int(obj['category_id'])
+            if obj_id == 18:
+                obj_id = 4
 
             bbox = list(obj['bbox'])
 
@@ -103,7 +110,7 @@ class FlirDataset(Dataset):
             boxes.append(bbox)
             area.append(obj['area'])
             iscrowd.append(obj['iscrowd'])
-            labels.append(int(obj['category_id'])) # include -1 for Run2
+            labels.append(obj_id) 
 
         target = dict()
         target['boxes'] = torch.as_tensor(boxes, dtype=torch.float32)#.reshape(-1, 4)
