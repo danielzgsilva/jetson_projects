@@ -90,7 +90,7 @@ def validation(opts):
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
     val_dataset = FlirDataset(data_root=opts.data_root, validation=True)
-    val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=10, shuffle=False, num_workers=4,
+    val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=4, shuffle=False, num_workers=4,
                                                    collate_fn=utils.collate_fn_tr)
 
     file_path = os.path.join(opts.save_dir, opts.model)
