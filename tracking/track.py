@@ -3,6 +3,7 @@ import torch
 
 from multitracker import JDETracker
 from timer import Timer
+import visualization as vis
 
 
 import functions
@@ -49,7 +50,6 @@ def main(save_detected_videos=False):
             out_video = cv2.VideoWriter(out_vid_name, cv2.VideoWriter_fourcc(*'MJPG'), fps, size)
 
         dets = []
-        results = []
         frame_id = 0
         while cap.isOpened():
             timer.tic()
@@ -63,9 +63,6 @@ def main(save_detected_videos=False):
             online_tlwhs = []
             online_ids = []
 
-            #face_locations, face_names = functions.detect_faces(frame, known_face_dict, resize_factor=0.1)
-            #dets.append((face_locations, face_names))
-
             for t in online_targets:
                 tlwh = t.tlwh
                 tid = t.track_id
@@ -75,14 +72,16 @@ def main(save_detected_videos=False):
             timer.toc()
 
             # save results
-            results.append((frame_id + 1, online_tlwhs, online_ids))
-            frame_id += 1
-
+            dets.append((frame_id + 1, online_tlwhs, online_ids))
+            print('frame: {} fps: {:.2} dets: {}'.format(frame_id, 1. / timer.average_time, online_tlwhs))
             if save_detected_videos:
-                print(frame.shape, face_locations)
-                frame = functions.display_results(frame, face_locations, face_names)
+                frame = vis.plot_tracking(frame, online_tlwhs, online_ids, frame_id=frame_id,
+                                          fps=1. / timer.average_time)
+                #cv2.imshow('vid', frame)
                 frame = frame[:, :, ::-1]
                 out_video.write(frame)
+
+            frame_id += 1
 
         detections[video_name] = dets
 

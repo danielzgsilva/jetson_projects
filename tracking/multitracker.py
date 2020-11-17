@@ -1,3 +1,4 @@
+from collections import deque
 import numpy as np
 import face_recognition
 
@@ -151,6 +152,16 @@ class STrack(BaseTrack):
         ret[2:] += ret[:2]
         return ret
 
+    @staticmethod
+    # @jit(nopython=True)
+    def trbl_to_tlwh(trbl):
+        ret = np.asarray(trbl).copy().astype(np.int)
+        ret[1] = int(trbl[3])
+        ret[2] = int(trbl[1] - trbl[3])
+        ret[3] = int(trbl[2] - trbl[0])
+        return ret
+
+
     def __repr__(self):
         return 'OT_{}_({}-{})'.format(self.track_id, self.start_frame, self.end_frame)
 
@@ -168,7 +179,6 @@ class JDETracker(object):
         self.max_time_lost = self.buffer_size
         self.max_per_image = K
         self.kalman_filter = KalmanFilter()
-
 
     def merge_outputs(self, detections):
         results = {}
@@ -201,13 +211,12 @@ class JDETracker(object):
         face_encodings = face_recognition.face_encodings(img, face_locations)
 
         print(face_locations)
-        print(face_encodings)
 
         # need to go from trbl to tlwh
         if len(face_locations) > 0:
             '''Detections'''
-            detections = [STrack(STrack.tlbr_to_tlwh(tlbrs), 1, f, 30) for
-                          (tlbrs, f) in zip(face_locations, face_encodings)]
+            detections = [STrack(STrack.trbl_to_tlwh(trbls), 1, f, self.buffer_size) for
+                          (trbls, f) in zip(face_locations, face_encodings)]
         else:
             detections = []
 
@@ -299,7 +308,6 @@ class JDETracker(object):
         self.tracked_stracks, self.lost_stracks = remove_duplicate_stracks(self.tracked_stracks, self.lost_stracks)
         # get scores of lost tracks
         output_stracks = [track for track in self.tracked_stracks if track.is_activated]
-
 
         return output_stracks
 
