@@ -6,9 +6,13 @@ import matching
 from kalman_filter import KalmanFilter
 from basetrack import BaseTrack, TrackState
 
+import functions
+import cv2
+
 
 class STrack(BaseTrack):
     shared_kalman = KalmanFilter()
+
     def __init__(self, tlwh, score, temp_feat, buffer_size=30):
         # wait activate
         self._tlwh = np.asarray(tlwh, dtype=np.float)
@@ -20,8 +24,8 @@ class STrack(BaseTrack):
         self.tracklet_len = 0
 
         self.smooth_feat = None
-        self.update_features(temp_feat)
         self.features = deque([], maxlen=buffer_size)
+        self.update_features(temp_feat)
         self.alpha = 0.9
 
     def update_features(self, feat):
@@ -53,17 +57,34 @@ class STrack(BaseTrack):
                 stracks[i].mean = mean
                 stracks[i].covariance = cov
 
-    def activate(self, kalman_filter, frame_id):
+    def predict_name(self, known_face_dict, thresh):
+        known_face_encodings = known_face_dict['features']
+        known_face_names = known_face_dict['labels']
+        face_name = None
+
+        face_distances = face_recognition.face_distance(known_face_encodings, self.smooth_feat)
+
+        best_match_index = np.argmin(face_distances)
+
+        if face_distances[best_match_index] <= thresh:
+            face_name = known_face_names[best_match_index]
+        else:
+            face_name = 'Unknown'
+
+        return face_name
+
+    def activate(self, known_face_dict, kalman_filter, frame_id, name_match_thresh):
         """Start a new tracklet"""
         self.kalman_filter = kalman_filter
         self.track_id = self.next_id()
+        self.track_name = self.predict_name(known_face_dict, name_match_thresh)
         self.mean, self.covariance = self.kalman_filter.initiate(self.tlwh_to_xyah(self._tlwh))
 
         self.tracklet_len = 0
         self.state = TrackState.Tracked
         if frame_id == 1:
             self.is_activated = True
-        #self.is_activated = True
+        # self.is_activated = True
         self.frame_id = frame_id
         self.start_frame = frame_id
 
@@ -155,19 +176,19 @@ class STrack(BaseTrack):
     @staticmethod
     # @jit(nopython=True)
     def trbl_to_tlwh(trbl):
-        ret = np.asarray(trbl).copy().astype(np.int)
-        ret[1] = int(trbl[3])
-        ret[2] = int(trbl[1] - trbl[3])
-        ret[3] = int(trbl[2] - trbl[0])
+        # top right bottom left to top left width height
+        ret = np.asarray(trbl).copy()
+        ret[1] = trbl[3]
+        ret[2] = max(0, trbl[1] - trbl[3])
+        ret[3] = max(0, trbl[2] - trbl[0])
         return ret
 
-
     def __repr__(self):
-        return 'OT_{}_({}-{})'.format(self.track_id, self.start_frame, self.end_frame)
+        return 'OT_{}_{}_({}-{})'.format(self.track_id, self.track_name, self.start_frame, self.end_frame)
 
 
 class JDETracker(object):
-    def __init__(self, frame_rate=30, conf=0.6, K=20):
+    def __init__(self, known_face_dict, frame_rate=30, conf=0.6, K=20):
         self.tracked_stracks = []  # type: list[STrack]
         self.lost_stracks = []  # type: list[STrack]
         self.removed_stracks = []  # type: list[STrack]
@@ -179,6 +200,7 @@ class JDETracker(object):
         self.max_time_lost = self.buffer_size
         self.max_per_image = K
         self.kalman_filter = KalmanFilter()
+        self.known_face_dict = known_face_dict
 
     def merge_outputs(self, detections):
         results = {}
@@ -210,8 +232,6 @@ class JDETracker(object):
         face_locations = face_recognition.face_locations(img)
         face_encodings = face_recognition.face_encodings(img, face_locations)
 
-        print(face_locations)
-
         # need to go from trbl to tlwh
         if len(face_locations) > 0:
             '''Detections'''
@@ -232,11 +252,11 @@ class JDETracker(object):
         ''' Step 2: First association, with embedding'''
         strack_pool = joint_stracks(tracked_stracks, self.lost_stracks)
         # Predict the current location with KF
-        #for strack in strack_pool:
-            #strack.predict()
+        # for strack in strack_pool:
+        # strack.predict()
         STrack.multi_predict(strack_pool)
         dists = matching.embedding_distance(strack_pool, detections)
-        #dists = matching.gate_cost_matrix(self.kalman_filter, dists, strack_pool, detections)
+        # dists = matching.gate_cost_matrix(self.kalman_filter, dists, strack_pool, detections)
         dists = matching.fuse_motion(self.kalman_filter, dists, strack_pool, detections)
         matches, u_track, u_detection = matching.linear_assignment(dists, thresh=0.7)
 
@@ -289,7 +309,7 @@ class JDETracker(object):
             track = detections[inew]
             if track.score < self.det_thresh:
                 continue
-            track.activate(self.kalman_filter, self.frame_id)
+            track.activate(self.known_face_dict, self.kalman_filter, self.frame_id, self.det_thresh)
             activated_stracks.append(track)
 
         """ Step 5: Update state"""
