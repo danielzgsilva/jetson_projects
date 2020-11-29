@@ -11,7 +11,7 @@ def main(save_detected_videos=False):
     known_face_dict['labels'] = [(x + ' ' + str(i)) for i, x in enumerate(known_face_dict['labels'])]
     print('number of known faces: ', len(known_face_dict['features'][0]))
 
-    cap = cv2.VideoCapture("~/dev/video1")
+    cap = cv2.VideoCapture("/dev/video1")
     fps = int(cap.get(cv2.CAP_PROP_FPS))
 
     tracker = JDETracker(known_face_dict, frame_rate=fps)
