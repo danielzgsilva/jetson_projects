@@ -47,7 +47,6 @@ def main(save_detected_videos=False):
         # Read until video is completed
         while cap.isOpened():
             # Capture frame-by-frame
-            timer.tic()
             ret, frame = cap.read()
             if ret:
                 # Press Q on keyboard to  exit
@@ -55,7 +54,9 @@ def main(save_detected_videos=False):
                     break
 
                 frame = frame[:, :, ::-1]
+                timer.tic()
                 targets = tracker.update(frame)
+                timer.toc()
 
                 tlwhs = []
                 ids = []
@@ -64,8 +65,6 @@ def main(save_detected_videos=False):
                     tlwhs.append(t.tlwh)
                     ids.append(t.track_id)
                     names.append(t.track_name)
-
-                timer.toc()
 
                 dets.append((frame_id + 1, tlwhs, ids))
                 print('frame: {} fps: {:.2} dets: {}'.format(frame_id, 1. / timer.average_time, tlwhs))
