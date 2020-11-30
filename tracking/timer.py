@@ -15,7 +15,7 @@ class Timer(object):
         self.calls = 0
         self.start_time = 0.
         self.diff = 0.
-        self.average_time = 0.
+        self.average_time = 0.00001
 
         self.duration = 0.
 

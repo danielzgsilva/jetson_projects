@@ -6,7 +6,7 @@ import visualization as vis
 
 
 def main(save_detected_videos=False):
-    video_names = ['KevinTester.mp4']
+    video_names = ['vid2.mp4']
 
     """
     The ground-truth detections with format {video_name: [(face_locations, face_names), ...]} where the list is of length T
@@ -15,9 +15,9 @@ def main(save_detected_videos=False):
     """
     ground_truth_detections = {}
 
-    known_face_dict = pickle.load(open('face_encodings_fixed1.pickle', 'rb'))
+    known_face_dict = pickle.load(open('face_encodings_final.pickle', 'rb'))
     known_face_dict['features'] = [x[0] for i, x in enumerate(known_face_dict['features'])]
-    known_face_dict['labels'] = [(x + ' ' + str(i)) for i, x in enumerate(known_face_dict['labels'])]
+    known_face_dict['labels'] = [x for i, x in enumerate(known_face_dict['labels'])]
     print('number of known faces: ', len(known_face_dict['features'][0]))
 
     detections = {}
@@ -47,6 +47,8 @@ def main(save_detected_videos=False):
         # Read until video is completed
         while cap.isOpened():
             # Capture frame-by-frame
+            if frame_id > 0:
+                timer.tic()
             ret, frame = cap.read()
             if ret:
                 # Press Q on keyboard to  exit
@@ -54,9 +56,11 @@ def main(save_detected_videos=False):
                     break
 
                 frame = frame[:, :, ::-1]
-                timer.tic()
                 targets = tracker.update(frame)
-                timer.toc()
+                
+                duration = 0.0000001
+                if frame_id > 0:
+                    duration = timer.toc(average=False)
 
                 tlwhs = []
                 ids = []

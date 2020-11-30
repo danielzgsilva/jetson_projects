@@ -31,8 +31,6 @@ def plot_tracking(im, tlwhs, obj_ids, scores=None, frame_id=0, fps=0., names=Non
 
     text_scale = max(1, im.shape[1] / 1600.)
     text_thickness = 1 if text_scale > 1.1 else 1
-    text_scale = 2.0
-    text_thickness = 1
     line_thickness = max(1, int(im.shape[1] / 500.))
 
     cv2.putText(im, 'frame: %d fps: %.2f num: %d' % (frame_id, fps, len(tlwhs)),
