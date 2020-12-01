@@ -31,7 +31,7 @@ def main(save_detected_videos=False):
         if save_detected_videos:
             frame_width = int(cap.get(3))
             frame_height = int(cap.get(4))
-
+            print(frame_width, frame_height)
             out_vid_name = vid_name.split('.')[0] + '_sort_results.avi'
             size = (frame_width, frame_height)
             out_video = cv2.VideoWriter(out_vid_name, cv2.VideoWriter_fourcc(*'MJPG'), fps, size)

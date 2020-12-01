@@ -40,7 +40,7 @@ def main(save_detected_videos=False):
     # Read until video is completed
     while cap.isOpened():
         # Capture frame-by-frame
-        if frame_id > 0:
+        if frame_id > 1:
             timer.tic()
         ret, frame = cap.read()
         if ret:
@@ -53,7 +53,7 @@ def main(save_detected_videos=False):
                 targets = tracker.update(frame)
             
             duration = 0.0000001
-            if frame_id > 0:
+            if frame_id > 1:
                 duration = timer.toc(average=False)
 
             if frame_id % 2 == 0:
@@ -72,7 +72,7 @@ def main(save_detected_videos=False):
                 frame = vis.plot_tracking(frame, tlwhs, ids, frame_id=frame_id,
                                           fps=1. / timer.average_time, names=names)
                 frame = frame[:, :, ::-1]
-                #frame = cv2.resize(frame, (orig_width, orig_height))
+                frame = cv2.resize(frame, (orig_width, orig_height))
                 cv2.imshow('Group 4 Live Demo', frame)
                 out_video.write(frame)
 

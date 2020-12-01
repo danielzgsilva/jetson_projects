@@ -188,14 +188,14 @@ class STrack(BaseTrack):
 
 
 class JDETracker(object):
-    def __init__(self, known_face_dict, frame_rate=30, conf=0.6, K=20):
+    def __init__(self, known_face_dict, frame_rate=30, conf=0.65, K=20):
         self.tracked_stracks = []  # type: list[STrack]
         self.lost_stracks = []  # type: list[STrack]
         self.removed_stracks = []  # type: list[STrack]
 
         self.frame_id = 0
         self.det_thresh = conf
-        self.track_buffer = 30
+        self.track_buffer = 20
         self.buffer_size = int(frame_rate / 30.0 * self.track_buffer)
         self.max_time_lost = self.buffer_size
         self.max_per_image = K
@@ -229,6 +229,7 @@ class JDETracker(object):
         height = img.shape[0]
 
         ''' Step 1: Get detections & embeddings'''
+        #face_locations = face_recognition.face_locations(img, model="cnn")
         face_locations = face_recognition.face_locations(img)
         face_encodings = face_recognition.face_encodings(img, face_locations)
 
@@ -258,7 +259,7 @@ class JDETracker(object):
         dists = matching.embedding_distance(strack_pool, detections)
         # dists = matching.gate_cost_matrix(self.kalman_filter, dists, strack_pool, detections)
         dists = matching.fuse_motion(self.kalman_filter, dists, strack_pool, detections)
-        matches, u_track, u_detection = matching.linear_assignment(dists, thresh=0.7)
+        matches, u_track, u_detection = matching.linear_assignment(dists, thresh=0.8)
 
         for itracked, idet in matches:
             track = strack_pool[itracked]
@@ -274,7 +275,7 @@ class JDETracker(object):
         detections = [detections[i] for i in u_detection]
         r_tracked_stracks = [strack_pool[i] for i in u_track if strack_pool[i].state == TrackState.Tracked]
         dists = matching.iou_distance(r_tracked_stracks, detections)
-        matches, u_track, u_detection = matching.linear_assignment(dists, thresh=0.5)
+        matches, u_track, u_detection = matching.linear_assignment(dists, thresh=0.7)
 
         for itracked, idet in matches:
             track = r_tracked_stracks[itracked]
