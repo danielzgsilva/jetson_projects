@@ -3,17 +3,21 @@ import pickle
 from multitracker import JDETracker
 from timer import Timer
 import visualization as vis
+import metrics
 
+def evaluate_detections(gt, preds):
+    metrics.get_detection_accuracy(preds, gt)
+    metrics.get_classification_accuracy(preds, gt)
 
 def main(save_detected_videos=False):
-    video_names = ['vid2.mp4']
+    video_names = ['vid1.mp4', 'vid2.mp4']
 
     """
     The ground-truth detections with format {video_name: [(face_locations, face_names), ...]} where the list is of length T
     face_locations is a list of length N with format [(top, right, bottom, left), ...]
     face_names is a list of length N with format [name, ...]
     """
-    ground_truth_detections = {}
+    gt_files = ['vid1_annotations.txt', 'vid2_annotations.txt']
 
     known_face_dict = pickle.load(open('face_encodings_final.pickle', 'rb'))
     known_face_dict['features'] = [x[0] for i, x in enumerate(known_face_dict['features'])]
@@ -21,7 +25,7 @@ def main(save_detected_videos=False):
     print('number of known faces: ', len(known_face_dict['features'][0]))
 
     detections = {}
-    for vid_name in video_names:
+    for vid, vid_name in enumerate(video_names):
         cap = cv2.VideoCapture(vid_name)
         fps = int(cap.get(cv2.CAP_PROP_FPS))
 
@@ -56,7 +60,8 @@ def main(save_detected_videos=False):
                     break
 
                 frame = frame[:, :, ::-1]
-                targets = tracker.update(frame)
+                #frame = cv2.resize(frame, (320, 180))
+                targets, face_locations = tracker.update(frame)
                 
                 duration = 0.0000001
                 if frame_id > 0:
@@ -70,7 +75,7 @@ def main(save_detected_videos=False):
                     ids.append(t.track_id)
                     names.append(t.track_name)
 
-                dets.append((frame_id + 1, tlwhs, ids))
+                dets.append((face_locations, names, ids))
                 print('frame: {} fps: {:.2} dets: {}'.format(frame_id, 1. / timer.average_time, tlwhs))
 
                 if save_detected_videos:
@@ -86,12 +91,19 @@ def main(save_detected_videos=False):
                 break
 
         detections[vid_name] = dets
+        
         cap.release()
         if save_detected_videos:
             out_video.release()
-
+        
         cv2.destroyAllWindows()
-
+        
+        #gt_dets = metrics.load_annotations(gt_files[vid])
+        #evaluate_detections(gt_dets, dets)
+    
+    with open('predictions.pickle', 'wb') as f:
+        pickle.dump(detections, f)
+    
 
 if __name__ == '__main__':
     main(True)

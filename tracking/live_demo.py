@@ -50,7 +50,7 @@ def main(save_detected_videos=False):
             
             frame = frame[:, :, ::-1]
             if frame_id % 2 == 0:
-                targets = tracker.update(frame)
+                targets,_ = tracker.update(frame)
             
             duration = 0.0000001
             if frame_id > 1:

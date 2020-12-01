@@ -330,7 +330,7 @@ class JDETracker(object):
         # get scores of lost tracks
         output_stracks = [track for track in self.tracked_stracks if track.is_activated]
 
-        return output_stracks
+        return output_stracks, face_locations
 
 
 def joint_stracks(tlista, tlistb):
